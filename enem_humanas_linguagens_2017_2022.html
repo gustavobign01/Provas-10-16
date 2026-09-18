@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ENEM 2017–2022 — Humanas e Linguagens</title>
+<style>
+:root{color-scheme:light dark;--bg:#f6f7f9;--panel:#fff;--text:#17191c;--muted:#60656d;--line:#d9dde3;--accent:#2357a6;--ok:#176b3a;--bad:#9b2727;--chip:#eef2f7}
+@media(prefers-color-scheme:dark){:root{--bg:#111317;--panel:#181b21;--text:#f1f3f5;--muted:#aab0b8;--line:#343943;--accent:#79a8ff;--ok:#6fcf97;--bad:#ff8b8b;--chip:#242a33}}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.48 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{padding:24px 20px 14px;max-width:1100px;margin:auto} h1{font-size:clamp(1.55rem,3vw,2.3rem);margin:0 0 6px} .subtitle{color:var(--muted);margin:0}
+main{max-width:1100px;margin:auto;padding:0 20px 40px}.toolbar,.card,.status,.stats{background:var(--panel);border:1px solid var(--line);border-radius:14px}.toolbar{padding:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;position:sticky;top:0;z-index:10;box-shadow:0 5px 18px rgba(0,0,0,.04)}
+label{font-size:.82rem;color:var(--muted);display:block;margin:0 0 4px} select,button{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font:inherit}button{cursor:pointer;font-weight:650}button.primary{background:var(--accent);color:white;border-color:transparent}button:disabled{opacity:.5;cursor:not-allowed}
+.status{padding:12px 14px;margin:14px 0;color:var(--muted)}.stats{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;margin-bottom:14px}.chip{background:var(--chip);border-radius:999px;padding:5px 10px;font-size:.9rem}
+.card{padding:22px}.meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:.92rem;margin-bottom:13px}.qtitle{font-size:1.15rem;font-weight:750;margin:0 0 14px}.context,.prompt{white-space:pre-wrap}.context{margin:0 0 14px}.prompt{font-weight:650;margin:0 0 13px}.media{display:grid;gap:10px;margin:12px 0}.media img,.alt img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:white}.answers{display:grid;gap:9px}.alt{display:grid;grid-template-columns:28px 1fr;gap:9px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer}.alt:hover{border-color:var(--accent)}.alt input{margin-top:4px}.letter{font-weight:800}.alt.correct{border-color:var(--ok);outline:1px solid var(--ok)}.alt.wrong{border-color:var(--bad);outline:1px solid var(--bad)}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:18px}.feedback{margin-top:12px;font-weight:700}.feedback.ok{color:var(--ok)}.feedback.bad{color:var(--bad)}.nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.footnote{font-size:.88rem;color:var(--muted);margin-top:20px}.empty{padding:30px;text-align:center;color:var(--muted)}
+.progress{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin-top:10px}.progress>span{height:100%;display:block;background:var(--accent);width:0}
+@media(max-width:760px){.toolbar{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.card{padding:16px}}
+@media print{.toolbar,.actions,.nav,.status,.stats,.footnote{display:none!important}body{background:white;color:black}.card{border:0;padding:0}.alt{break-inside:avoid}.media img{max-height:340px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>ENEM 2017–2022 — Humanas e Linguagens</h1>
+  <p class="subtitle">Banco interativo de 540 questões: 45 de Linguagens + 45 de Ciências Humanas por ano. De 2017 a 2022, Linguagens corresponde às questões 1–45 e Humanas às 46–90. Em língua estrangeira, prioriza Inglês e usa Espanhol como alternativa quando necessário.</p>
+</header>
+<main>
+<section class="toolbar" aria-label="Filtros">
+  <div><label for="year">Ano</label><select id="year"></select></div>
+  <div><label for="area">Área</label><select id="area"><option value="humanas">Ciências Humanas</option><option value="linguagens">Linguagens</option></select></div>
+  <div><label for="statusFilter">Filtro</label><select id="statusFilter"><option value="all">Todas</option><option value="unanswered">Não respondidas</option><option value="wrong">Erradas</option><option value="correct">Certas</option></select></div>
+  <div><label>&nbsp;</label><button class="primary" id="retry">Recarregar questão</button></div>
+</section>
+<div id="status" class="status">Carregando o primeiro ano…</div>
+<div id="stats" class="stats" hidden></div>
+<section id="questionCard" class="card" hidden>
+  <div id="meta" class="meta"></div>
+  <div id="qtitle" class="qtitle"></div>
+  <div id="context" class="context"></div>
+  <div id="media" class="media"></div>
+  <div id="prompt" class="prompt"></div>
+  <div id="answers" class="answers"></div>
+  <div id="feedback" class="feedback"></div>
+  <div class="actions">
+    <button id="check">Corrigir resposta</button>
+    <button id="reveal">Mostrar gabarito</button>
+    <button id="clearAnswer">Limpar resposta</button>
+  </div>
+  <div class="nav"><button id="prev">← Anterior</button><button id="next">Próxima →</button></div>
+  <div class="progress"><span id="bar"></span></div>
+</section>
+<div id="empty" class="empty" hidden>Nenhuma questão corresponde ao filtro atual.</div>
+<p class="footnote">Fonte das provas e gabaritos: Inep. A interface consulta um espelho estático open-source das questões e carrega apenas a questão visualizada, evitando requisições em massa e erros de limite de acesso. As imagens permanecem referenciadas pela fonte original quando necessário. O progresso fica salvo apenas no armazenamento local do navegador.</p>
+</main>
+<script>
+(() => {
+  const YEARS=[2017,2018,2019,2020,2021,2022];
+  const RAW='https://raw.githubusercontent.com/ardotheedu/api-enem/main/quiz-items';
+  const $=id=>document.getElementById(id);
+  const yearSel=$('year'), areaSel=$('area'), filterSel=$('statusFilter');
+  const status=$('status'), card=$('questionCard'), empty=$('empty'), stats=$('stats');
+  YEARS.forEach(y=>yearSel.add(new Option(String(y),String(y)))); yearSel.value='2022';
+
+  const data=new Map();
+  const qcache=new Map();
+  let view=[]; let pos=0; let renderToken=0;
+  const progressKey='enem-2017-2022-hl-progress-v1';
+  let progress={}; try{progress=JSON.parse(localStorage.getItem(progressKey)||'{}')}catch{progress={}};
+
+  function indexesFor(area){
+    // A partir de 2017, no primeiro dia: Linguagens = 1–45 e Humanas = 46–90.
+    return area==='humanas'
+      ? Array.from({length:45},(_,i)=>i+46)
+      : Array.from({length:45},(_,i)=>i+1);
+  }
+  function foldersFor(index,area){
+    // As cinco primeiras questões de Linguagens são de língua estrangeira.
+    if(area==='linguagens' && index>=1 && index<=5) return [`${index}-ingles`,`${index}-espanhol`,String(index)];
+    return [String(index)];
+  }
+  function questionUrl(year,folder){
+    return `${RAW}/${year}/questions/${folder}/details.json`;
+  }
+  function keyStub(year,area,index){return `${year}-${area}-${index}`}
+  function saveProgress(){localStorage.setItem(progressKey,JSON.stringify(progress))}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function stripMdImages(s){return String(s??'').replace(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/g,'').replace(/^\s+|\s+$/g,'')}
+  function rich(s){return esc(stripMdImages(s)).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/_([^_]+)_/g,'<em>$1</em>').replace(/\n/g,'<br>')}
+  function setStatus(msg){status.textContent=msg;status.hidden=false}
+  function hideStatus(){status.hidden=true}
+
+  async function fetchQuestion(year,area,index,force=false){
+    const ck=keyStub(year,area,index);
+    if(!force && qcache.has(ck)) return qcache.get(ck);
+    let lastError=null;
+    for(const folder of foldersFor(index,area)){
+      const url=questionUrl(year,folder);
+      try{
+        const r=await fetch(url,{cache:force?'reload':'default',headers:{Accept:'application/json'}});
+        if(!r.ok){lastError=new Error(`HTTP ${r.status}`); if(r.status===404) continue; throw lastError;}
+        const q=await r.json();
+        q.year=q.year||year;
+        qcache.set(ck,q);
+        return q;
+      }catch(e){lastError=e; if(String(e.message).includes('HTTP 404')) continue; throw e;}
+    }
+    throw lastError||new Error('Questão não encontrada na fonte');
+  }
+
+  function rebuild(){
+    const y=Number(yearSel.value), a=areaSel.value, f=filterSel.value;
+    const full=indexesFor(a);
+    view=full.filter(index=>{
+      const p=progress[keyStub(y,a,index)];
+      if(f==='all')return true;
+      if(f==='unanswered')return !p?.checked;
+      if(f==='wrong')return p?.checked&&!p.correct;
+      if(f==='correct')return p?.checked&&p.correct;
+      return true;
+    });
+    pos=Math.min(pos,Math.max(0,view.length-1));
+    updateStats(full); render();
+  }
+
+  function updateStats(full){
+    const y=Number(yearSel.value),a=areaSel.value;
+    const answered=full.filter(i=>progress[keyStub(y,a,i)]?.checked).length;
+    const correct=full.filter(i=>progress[keyStub(y,a,i)]?.correct).length;
+    stats.innerHTML=`<span class="chip">${esc(y)}</span><span class="chip">${a==='humanas'?'Ciências Humanas':'Linguagens'}</span><span class="chip">45 questões</span><span class="chip">Respondidas: ${answered}</span><span class="chip">Acertos: ${correct}</span><span class="chip">Aproveitamento: ${answered?Math.round(correct/answered*100):0}%</span>`;
+    stats.hidden=false;
+  }
+
+  async function render(force=false){
+    const token=++renderToken;
+    if(!view.length){card.hidden=true;empty.hidden=false;hideStatus();return}
+    empty.hidden=true;
+    const y=Number(yearSel.value), a=areaSel.value, index=view[pos];
+    card.hidden=true;
+    setStatus(`Carregando ENEM ${y} — questão ${index}…`);
+    try{
+      const q=await fetchQuestion(y,a,index,force);
+      if(token!==renderToken)return;
+      hideStatus(); card.hidden=false;
+      paintQuestion(q,index);
+    }catch(e){
+      if(token!==renderToken)return;
+      card.hidden=true;
+      setStatus(`Não foi possível carregar a questão ${index} do ENEM ${y}. Detalhe: ${e.message}. Use “Recarregar questão”.`);
+    }
+  }
+
+  function paintQuestion(q,index){
+    const y=Number(yearSel.value), a=areaSel.value, p=progress[keyStub(y,a,index)]||{};
+    $('meta').innerHTML=`<span>ENEM ${esc(y)}</span><span>•</span><span>${a==='humanas'?'Ciências Humanas':'Linguagens'}</span>${q.language?`<span>•</span><span>${esc(q.language==='ingles'?'Inglês':q.language)}</span>`:''}<span>•</span><span>${pos+1} de ${view.length} no filtro</span>`;
+    $('qtitle').textContent=q.title||`Questão ${index}`;
+    $('context').innerHTML=rich(q.context||'');
+    $('prompt').innerHTML=rich(q.alternativesIntroduction||'Assinale a alternativa correta.');
+
+    const media=$('media');media.innerHTML='';
+    const files=[...(q.files||[])];
+    const md=[...String(q.context||'').matchAll(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/g)].map(m=>m[1]);
+    [...new Set([...files,...md].filter(Boolean))].forEach(src=>{
+      const img=document.createElement('img');img.src=src;img.alt='Imagem associada à questão';img.loading='lazy';media.appendChild(img)
+    });
+
+    const ans=$('answers');ans.innerHTML='';
+    (q.alternatives||[]).forEach(alt=>{
+      const lab=document.createElement('label');lab.className='alt';lab.dataset.letter=alt.letter;
+      const checked=p.answer===alt.letter?'checked':'';
+      lab.innerHTML=`<input type="radio" name="answer" value="${esc(alt.letter)}" ${checked}><div><span class="letter">${esc(alt.letter)})</span> ${rich(alt.text||'')}${alt.file?`<div><img src="${esc(alt.file)}" alt="Imagem da alternativa ${esc(alt.letter)}" loading="lazy"></div>`:''}</div>`;
+      ans.appendChild(lab)
+    });
+    $('feedback').textContent='';$('feedback').className='feedback';
+    if(p.revealed||p.checked)paintFeedback(q,p);
+    $('prev').disabled=pos===0;$('next').disabled=pos===view.length-1;
+    $('bar').style.width=`${((pos+1)/view.length)*100}%`;
+  }
+
+  function correctLetter(q){return q.correctAlternative||(q.alternatives||[]).find(a=>a.isCorrect)?.letter||''}
+  function paintFeedback(q,p){
+    const corr=correctLetter(q);
+    document.querySelectorAll('.alt').forEach(el=>{
+      el.classList.remove('correct','wrong');
+      if(el.dataset.letter===corr)el.classList.add('correct');
+      if(p.checked&&p.answer&&el.dataset.letter===p.answer&&p.answer!==corr)el.classList.add('wrong')
+    });
+    const f=$('feedback');
+    if(p.checked){
+      if(p.correct){f.textContent='Correta.';f.className='feedback ok'}
+      else{f.textContent=`Incorreta. Gabarito: ${corr}.`;f.className='feedback bad'}
+    } else if(p.revealed){f.textContent=`Gabarito: ${corr}.`;f.className='feedback'}
+  }
+
+  $('check').onclick=async()=>{
+    if(!view.length)return;
+    const y=Number(yearSel.value),a=areaSel.value,index=view[pos];
+    const chosen=document.querySelector('input[name="answer"]:checked');
+    if(!chosen){$('feedback').textContent='Selecione uma alternativa antes de corrigir.';return}
+    try{
+      const q=await fetchQuestion(y,a,index);
+      const corr=correctLetter(q);
+      progress[keyStub(y,a,index)]={answer:chosen.value,checked:true,correct:chosen.value===corr,revealed:true};
+      saveProgress();paintQuestion(q,index);updateStats(indexesFor(a));
+    }catch(e){setStatus(`Não foi possível corrigir agora. Detalhe: ${e.message}`)}
+  };
+
+  $('reveal').onclick=async()=>{
+    if(!view.length)return;
+    const y=Number(yearSel.value),a=areaSel.value,index=view[pos];
+    const old=progress[keyStub(y,a,index)]||{};
+    progress[keyStub(y,a,index)]={...old,revealed:true};saveProgress();
+    try{const q=await fetchQuestion(y,a,index);paintQuestion(q,index)}catch(e){setStatus(`Não foi possível mostrar o gabarito. Detalhe: ${e.message}`)}
+  };
+
+  $('clearAnswer').onclick=()=>{
+    if(!view.length)return;
+    const y=Number(yearSel.value),a=areaSel.value,index=view[pos];
+    delete progress[keyStub(y,a,index)];saveProgress();updateStats(indexesFor(a));render();
+  };
+
+  $('prev').onclick=()=>{if(pos>0){pos--;render();window.scrollTo({top:0,behavior:'smooth'})}};
+  $('next').onclick=()=>{if(pos<view.length-1){pos++;render();window.scrollTo({top:0,behavior:'smooth'})}};
+  $('retry').onclick=()=>render(true);
+  yearSel.onchange=()=>{pos=0;rebuild()};
+  areaSel.onchange=()=>{pos=0;rebuild()};
+  filterSel.onchange=()=>{pos=0;rebuild()};
+
+  rebuild();
+})();
+</script>
+</body>
+</html>
