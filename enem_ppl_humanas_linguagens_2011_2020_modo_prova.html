@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>ENEM PPL 2011–2020 — Humanas e Linguagens</title>
+<style>
+:root {
+  --bg:#f4f6f8;--panel:#fff;--text:#17191d;--muted:#667085;--line:#d8dee8;
+  --primary:#1f5dbb;--primary2:#174991;--answered:#e8f0fc;--ok:#1d7a46;--bad:#b52d2d;
+  --warn:#9a6700;--shadow:0 10px 28px rgba(15,23,42,.08);
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#0e1117;--panel:#171b23;--text:#eef2f7;--muted:#a9b1bd;--line:#343b47;
+  --primary:#78a8ff;--primary2:#568de9;--answered:#23344f;--ok:#65d18d;--bad:#ff8b8b;
+  --warn:#f0c46c;--shadow:0 10px 28px rgba(0,0,0,.25)}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,select,a{font:inherit}
+header{max-width:1180px;margin:auto;padding:22px 18px 10px}
+h1{font-size:clamp(1.45rem,4.2vw,2.25rem);line-height:1.12;margin:0 0 7px}
+header p{margin:0;color:var(--muted)}
+.wrap{max-width:1180px;margin:auto;padding:10px 18px 38px}
+.controls{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;background:var(--panel);border:1px solid var(--line);padding:12px;border-radius:14px;box-shadow:var(--shadow);position:sticky;top:0;z-index:20}
+.field label{display:block;color:var(--muted);font-size:.78rem;margin:0 0 4px}
+select{width:100%;padding:10px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text)}
+.summary{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.chip{padding:6px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:.88rem}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tab{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:11px;padding:11px;font-weight:750;cursor:pointer}
+.tab.active{background:var(--primary);color:white;border-color:var(--primary)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.booktop{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.booktop strong{font-size:.95rem}
+.booktop a{text-decoration:none;background:var(--primary);color:white;padding:9px 12px;border-radius:9px;font-weight:700}
+.pdfbox{height:min(72vh,850px);min-height:520px;background:#eceff3}
+.pdfbox iframe{width:100%;height:100%;border:0;display:block}
+.pdfhelp{display:none;padding:24px;color:var(--muted);text-align:center}
+.answer-panel{padding:16px}
+.qhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:13px}
+.qhead h2{font-size:1.25rem;margin:0}
+.qhead .small{color:var(--muted);font-size:.88rem;text-align:right}
+.answer-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0 18px}
+.answer-btn{padding:14px 4px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text);font-weight:850;font-size:1.12rem;cursor:pointer}
+.answer-btn.selected{background:var(--primary);border-color:var(--primary);color:white}
+.answer-btn:disabled{cursor:default}
+.resultline{display:none;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-weight:700}
+.resultline.ok{display:block;background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok)}
+.resultline.bad{display:block;background:color-mix(in srgb,var(--bad) 12%,transparent);color:var(--bad)}
+.resultline.annulled{display:block;background:color-mix(in srgb,var(--warn) 13%,transparent);color:var(--warn)}
+.grid-title{font-size:.84rem;color:var(--muted);margin-bottom:7px}
+.qgrid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+.qcell{min-height:40px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;font-size:.79rem;font-weight:750;cursor:pointer;padding:5px 2px}
+.qcell.current{outline:2px solid var(--primary);outline-offset:1px}
+.qcell.answered{background:var(--answered);border-color:var(--primary)}
+.qcell.correct{background:color-mix(in srgb,var(--ok) 16%,var(--panel));border-color:var(--ok);color:var(--ok)}
+.qcell.wrong{background:color-mix(in srgb,var(--bad) 13%,var(--panel));border-color:var(--bad);color:var(--bad)}
+.qcell.annulled{background:color-mix(in srgb,var(--warn) 16%,var(--panel));border-color:var(--warn);color:var(--warn)}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}
+.action{padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-weight:700;cursor:pointer}
+.action.primary{background:var(--primary);color:white;border-color:var(--primary)}
+.action.danger{color:var(--bad)}
+.finishbox{border-top:1px solid var(--line);margin-top:16px;padding-top:15px;display:grid;gap:8px}
+.finishbox .remaining{color:var(--muted);font-size:.9rem}
+.score{display:none;margin-top:13px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.score.show{display:block}
+.score strong{font-size:1.28rem}
+.note{margin-top:14px;color:var(--muted);font-size:.87rem}
+.hidden{display:none!important}
+@media(max-width:700px){
+  .wrap,header{padding-left:12px;padding-right:12px}
+  .controls{grid-template-columns:1fr 1fr}
+  .qgrid{grid-template-columns:repeat(5,1fr)}
+  .pdfbox{height:70vh;min-height:460px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>ENEM PPL 2011–2020 — Humanas e Linguagens</h1>
+  <p>ENEM PPL/Reaplicação de 2011 a 2020. Leia o caderno e preencha o cartão-resposta; o gabarito só é revelado depois das 45 respostas.</p>
+</header>
+<div class="wrap">
+  <section class="controls">
+    <div class="field"><label for="year">Ano</label><select id="year"></select></div>
+    <div class="field"><label for="area">Área</label><select id="area"></select></div>
+  </section>
+
+  <div id="summary" class="summary"></div>
+
+  <div class="tabs">
+    <button id="tabBook" class="tab active">📖 Caderno</button>
+    <button id="tabAnswers" class="tab">✓ Cartão-resposta</button>
+  </div>
+
+  <section id="bookPanel" class="panel">
+    <div class="booktop">
+      <strong id="bookLabel">Caderno</strong>
+      <a id="openPdf" target="_blank" rel="noopener">Abrir caderno em nova aba ↗</a>
+    </div>
+    <div class="pdfbox">
+      <iframe id="pdfFrame" title="Caderno oficial do ENEM PPL"></iframe>
+      <div id="pdfHelp" class="pdfhelp">Se o PDF não aparecer dentro da página no iPhone, use “Abrir caderno em nova aba”. O cartão-resposta continua salvo neste app.</div>
+    </div>
+  </section>
+
+  <section id="answerPanel" class="panel hidden">
+    <div class="answer-panel">
+      <div class="qhead">
+        <h2 id="qTitle">Questão</h2>
+        <div class="small" id="qPos"></div>
+      </div>
+      <div id="resultLine" class="resultline"></div>
+      <div class="answer-buttons" id="answerButtons"></div>
+
+      <div class="grid-title">Questões desta área — toque em um número para navegar</div>
+      <div id="qGrid" class="qgrid"></div>
+
+      <div class="nav">
+        <button id="prev" class="action">← Anterior</button>
+        <button id="next" class="action">Próxima →</button>
+      </div>
+
+      <div class="finishbox">
+        <div id="remaining" class="remaining"></div>
+        <button id="finish" class="action primary" disabled>Finalizar prova</button>
+        <button id="restart" class="action danger hidden">Refazer esta prova</button>
+      </div>
+      <div id="score" class="score"></div>
+
+      <div class="note" id="langNote"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const YEARS = Array.from({length:10},(_,i)=>2011+i);
+const AREA_OPTIONS = [{"value": "humanas", "label": "Ciências Humanas"}, {"value": "linguagens", "label": "Linguagens"}];
+const KEYS = {"2011": {"humanas": ["A", "E", "C", "D", "E", "B", "B", "D", "D", "E", "D", "B", "E", "C", "B", "C", "C", "C", "A", "C", "E", "C", "B", "E", "D", "C", "E", "C", "A", "C", "A", "E", "B", "C", "D", "E", "B", "B", "D", "A", "E", "E", "A", "D", "C"], "naturezas": ["D", "D", "E", "A", "C", "D", "D", "B", "B", "C", "A", "A", "C", "C", "B", "E", "A", "A", "B", "D", "D", "C", "E", "E", "D", "E", "B", "B", "A", "C", "E", "A", "C", "B", "B", "D", "D", "C", "B", "A", "E", "A", "A", "B", "E"], "linguagens": ["E", "D", "E", "D", "B", "B", "A", "B", "A", "A", "E", "D", "D", "A", "D", "E", "E", "C", "E", "C", "C", "E", "A", "C", "E", "A", "C", "D", "C", "B", "B", "D", "C", "E", "D", "A", "B", "C", "A", "A", "D", "B", "A", "B", "B"], "matematica": ["D", "A", "C", "D", "B", "E", "E", "A", "E", "D", "C", "E", "A", "E", "C", "A", "B", "A", "B", "B", "A", "E", "B", "A", "D", "D", "A", "B", "C", "C", "B", "B", "B", "B", "E", "A", "C", "A", "D", "C", "C", "C", "C", "A", "B"]}, "2012": {"humanas": ["A", "D", "C", "C", "D", "E", "E", "C", "A", "D", "B", "C", "B", "A", "A", "E", "B", "B", "E", "E", "B", "A", "D", "B", "A", "D", "C", "A", "E", "C", "A", "B", "A", "A", "D", "C", "E", "C", "B", "D", "B", "A", "B", "A", "C"], "naturezas": ["A", "E", "D", "C", "A", "B", "C", "C", "E", "B", "C", "D", "E", "C", "B", "B", "D", "C", "B", "C", "E", "A", "D", "C", "C", "E", "E", "D", "C", "E", "B", "E", "D", "A", "B", "A", "B", "D", "A", "E", "D", "E", "C", "A", "C"], "linguagens": ["E", "A", "D", "B", "A", "A", "C", "B", "C", "D", "A", "E", "D", "A", "B", "B", "D", "B", "B", "E", "A", "A", "C", "E", "C", "C", "B", "E", "A", "D", "E", "B", "C", "E", "B", "B", "B", "A", "C", "C", "E", "C", "D", "A", "C"], "matematica": ["C", "C", "C", "B", "C", "C", "D", "A", "C", "C", "C", "D", "A", "E", "A", "C", "B", "D", "A", "C", "C", "A", "D", "B", "C", "C", "B", "B", "C", "C", "B", "E", "D", "A", "D", "B", "E", "A", "C", "D", "C", "D", "B", "E", "D"]}, "2013": {"humanas": ["C", "C", "A", "D", "B", "C", "B", "D", "A", "C", "B", "D", "A", "E", "A", "D", "D", "C", "E", "C", "A", "D", "D", "A", "A", "A", "C", "B", "A", "A", "D", "C", "B", "B", "B", "E", "B", "B", "B", "A", "E", "B", "E", "E", "C"], "naturezas": ["C", "D", "B", "A", "B", "A", "E", "D", "A", "A", "C", "B", "A", "B", "D", "B", "B", "A", "A", "C", "B", "B", "D", "E", "D", "D", "B", "C", "B", "D", "E", "E", "B", "E", "E", "B", "B", "B", "C", "C", "E", "C", "B", "D", "E"], "linguagens": ["E", "B", "A", "E", "B", "C", "A", "D", "B", "B", "B", "C", "A", "B", "A", "D", "D", "C", "C", "B", "C", "A", "E", "E", "D", "C", "D", "C", "B", "B", "A", "C", "A", "C", "E", "A", "E", "E", "C", "C", "B", "D", "E", "C", "E"], "matematica": ["B", "B", "A", "C", "A", "C", "B", "C", "B", "E", "C", "E", "A", "A", "B", "C", "C", "E", "A", "D", "A", "A", "D", "C", "E", "E", "D", "E", "D", "B", "D", "B", "D", "A", "B", "D", "B", "A", "B", "D", "E", "E", "E", "C", "B"]}, "2014": {"humanas": ["C", "D", "E", "D", "E", "A", "E", "C", "A", "B", "D", "D", "D", "A", "A", "B", "A", "C", "C", "C", "D", "C", "A", "A", "E", "D", "A", "D", "A", "C", "B", "B", "C", "D", "C", "D", "D", "A", "A", "E", "E", "B", "D", "D", "B"], "naturezas": ["B", "A", "D", "C", "B", "A", "D", "A", "E", "B", "B", "D", "C", "C", "D", "E", "E", "B", "D", "A", "B", "B", "A", "C", "E", "C", "C", "E", "B", "E", "D", "E", "A", "E", "C", "C", "B", "E", "A", "D", "B", "B", "E", "C", "C"], "linguagens": ["B", "C", "B", "E", "E", "E", "D", "E", "E", "E", "E", "E", "C", "D", "C", "C", "B", "A", "D", "C", "C", "D", "E", "E", "A", "C", "A", "A", "E", "C", "D", "D", "A", "C", "A", "E", "D", "A", "A", "B", "C", "A", "A", "C", "A"], "matematica": ["C", "B", "E", "D", "C", "D", "A", "D", "B", "D", "E", "A", "C", "B", "A", "A", "A", "B", "B", "D", "A", "B", "B", "E", "C", "E", "A", "E", "B", "C", "E", "D", "A", "D", "C", "E", "A", "D", "C", "B", "B", "C", "D", "C", "D"]}, "2015": {"humanas": ["B", "B", "D", "E", "D", "A", "A", "B", "E", "E", "B", "E", "A", "D", "C", "C", "B", "C", "A", "A", "E", "D", "C", "D", "A", "C", "D", "C", "C", "D", "C", "C", "E", "E", "D", "E", "E", "C", "D", "D", "D", "C", "A", "B", "C"], "naturezas": ["C", "D", "C", "C", "D", "C", "B", "C", "C", "D", "C", "E", "B", "E", "C", "B", "C", "D", "B", "C", "C", "A", "B", "A", "A", "B", "C", "D", "E", "C", "E", "A", "D", "B", "C", "B", "B", "B", "C", "D", "A", "D", "A", "D", "D"], "linguagens": ["C", "B", "B", "E", "D", "E", "A", "B", "C", "D", "E", "B", "D", "E", "C", "B", "A", "B", "E", "B", "A", "E", "E", "C", "B", "A", "D", "A", "D", "D", "E", "C", "E", "B", "D", "C", "C", "E", "A", "C", "E", "C", "C", "D", "B"], "matematica": ["A", "B", "D", "D", "C", "C", "C", "C", "C", "A", "D", "C", "B", "D", "A", "B", "C", "A", "D", "E", "D", "C", "B", "A", "D", "B", "B", "B", "E", "D", "C", "E", "C", "C", "E", "D", "E", "E", "B", "A", "C", "E", "C", "B", "D"]}, "2016": {"humanas": ["D", "D", "C", "B", "E", "C", "D", "D", "A", "B", "C", "B", "A", "C", "C", "C", "A", "B", "D", "A", "E", "C", "D", "D", "A", "D", "D", "B", "D", "D", "B", "C", "C", "A", "A", "D", "C", "B", "E", "A", "A", "C", "D", "A", "E"], "naturezas": ["E", "B", "B", "D", "C", "B", "A", "B", "C", "C", "B", "B", "D", "C", "E", "B", "A", "C", "E", "A", "C", "E", "B", "C", "E", "E", "A", "E", "E", "D", "A", "A", "C", "D", "A", "D", "B", "C", "D", "D", "E", "A", "C", "A", "E"], "linguagens": ["D", "E", "B", "E", "E", "E", "C", "E", "A", "C", "B", "E", "D", "D", "A", "C", "C", "E", "C", "E", "D", "C", "E", "E", "B", "D", "E", "A", "D", "C", "A", "D", "A", "A", "C", "A", "B", "D", "C", "B", "D", "D", "D", "D", "A"], "matematica": ["E", "E", "B", "C", "C", "D", "D", "B", "E", "D", "D", "C", "E", "D", "E", "A", "B", "E", "B", "D", "E", "A", "B", "A", "B", "B", "A", "E", "D", "A", "C", "D", "B", "A", "A", "C", "C", "B", "B", "D", "C", "C", "D", "C", "C"]}, "2017": {"linguagens": ["B", "A", "A", "C", "B", "B", "B", "A", "E", "E", "C", "D", "A", "A", "A", "E", "E", "B", "A", "B", "A", "A", "E", "D", "A", "C", "C", "A", "D", "C", "E", "D", "D", "D", "E", "B", "A", "A", "D", "C", "C", "A", "D", "C", "E"], "humanas": ["D", "C", "B", "C", "C", "C", "B", "C", "A", "B", "C", "A", "A", "C", "A", "E", "E", "E", "A", "D", "E", "D", "C", "C", "A", "A", "A", "C", "B", "A", "C", "C", "B", "E", "D", "A", "C", "A", "A", "B", "A", "A", "B", "C", "D"], "naturezas": ["C", "A", "C", "B", "D", "B", "E", "A", "E", "B", "D", "E", "A", "E", "E", "E", "E", "A", "A", "D", "E", "B", "D", "D", "D", "C", "E", "B", "C", "D", "E", "B", "C", "D", "B", "C", "B", "B", "D", "C", "C", "C", "C", "D", "D"], "matematica": ["C", "A", "C", "E", "D", "A", "E", "A", "B", "A", "D", "A", "D", "C", "E", "D", "D", "B", "B", "D", "B", "E", "E", "C", "D", "A", "D", "A", "B", "E", "C", "B", "D", "B", "B", "E", "D", "E", "B", "C", "E", "C", "C", "B", "D"]}, "2018": {"linguagens": ["B", "D", "A", "A", "B", "C", "D", "D", "D", "E", "B", "B", "E", "E", "C", "C", "E", "E", "A", "E", "A", "E", "C", "A", "E", "B", "B", "E", "C", "B", "E", "A", "B", "E", "A", "C", "E", "C", "C", "B", "D", "B", "E", "E", "B"], "humanas": ["A", "B", "D", "A", "B", "E", "E", "B", "B", "B", "A", "A", "D", "B", "B", "D", "D", "C", "A", "D", "D", "A", "B", "D", "E", "D", "B", "A", "D", "C", "A", "D", "A", "D", "C", "B", "B", "E", "C", "D", "E", "C", "D", "D", "D"], "naturezas": ["C", "D", "A", "B", "B", "C", "C", "E", "E", "C", "B", "D", "B", "E", "B", "A", "A", "C", "E", "A", "D", "E", "E", "E", "C", "A", "B", "D", "D", "A", "E", "D", "D", "B", "C", "A", "C", "B", "C", "E", "D", "E", "D", "C", "A"], "matematica": ["A", "B", "C", "E", "C", "C", "E", "A", "B", "C", "D", "E", "D", "D", "D", "D", "A", "E", "E", "C", "C", "C", "E", "B", "D", "A", "D", "D", "B", "B", "D", "B", "B", "B", "C", "C", "E", "D", "C", "E", "B", "A", "B", "E", "B"]}, "2019": {"linguagens": ["E", "D", "A", "B", "B", "D", "B", "A", "A", "C", "E", "A", "A", "E", "C", "B", "C", "B", "B", "E", "C", "D", "D", "E", "A", "D", "A", "B", "B", "E", "D", "E", "C", "E", "C", "A", "B", "B", "D", "B", "E", "A", "E", "B", "C"], "humanas": ["A", "B", "A", "E", "E", "D", "E", "E", "E", "B", "A", "A", "E", "A", "B", "D", "D", "C", "A", "C", "B", "E", "A", "C", "E", "B", "D", "E", "E", "C", "E", "D", "B", "D", "B", "C", "A", "B", "C", "E", "C", "A", "C", "B", "B"], "naturezas": ["B", "D", "A", "C", "A", "A", "D", "E", "B", "E", "D", "D", "D", "A", "E", "C", "A", "A", "E", "D", "B", "C", "E", "C", "E", "C", "E", "D", "C", "E", "C", "A", "D", "A", "E", "D", "E", "C", "B", "C", "B", "C", "D", "C", "B"], "matematica": ["D", "E", "A", "B", "D", "E", "D", "B", "D", "D", "A", "D", "C", "B", "C", "A", "C", "D", "E", "D", "E", "B", "A", "E", "B", "B", "B", "B", "C", "B", "C", "C", "E", "B", "C", "A", "C", "E", "D", "B", "C", "A", "C", "C", "D"]}, "2020": {"linguagens": ["E", "E", "B", "E", "A", "D", "B", "D", "B", "C", "C", "C", "C", "A", "B", "C", "E", "D", "D", "C", "E", "B", "E", "B", "B", "D", "A", "E", "A", "A", "A", "E", "B", "A", "D", "A", "E", "C", "D", "A", "D", "E", "A", "E", "E"], "humanas": ["D", "E", "D", "C", "D", "C", "B", "A", "E", "A", "C", "A", "A", "B", "E", "A", "C", "D", "E", "A", "B", "C", "E", "E", "E", "C", "D", "A", "A", "B", "C", "E", "E", "C", "B", "E", "A", "E", "D", "C", "D", "D", "B", "D", "B"], "naturezas": ["D", "B", "D", "A", "C", "X", "D", "B", "E", "A", "A", "A", "D", "E", "C", "E", "C", "A", "C", "E", "A", "C", "C", "C", "D", "B", "E", "E", "B", "E", "C", "C", "A", "B", "E", "A", "D", "C", "C", "E", "D", "E", "A", "B", "D"], "matematica": ["C", "D", "B", "E", "A", "A", "E", "C", "B", "A", "D", "A", "B", "C", "C", "A", "E", "B", "D", "B", "B", "A", "D", "E", "D", "D", "B", "B", "C", "E", "A", "E", "B", "B", "A", "D", "C", "E", "E", "C", "A", "D", "A", "D", "E"]}};
+const BOOKLETS = {"2011": {"day1": "https://download.inep.gov.br/educacao_basica/enem/ppl/2011/PPL_ENEM_2011_03_BRANCO.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/ppl/2011/PPL_ENEM_2011_06_CINZA.pdf", "label1": "1º dia — Caderno 3 Branco", "label2": "2º dia — Caderno 6 Cinza"}, "2012": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2012/2012_PV_reaplicacao_PPL_D1_CD3.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2012/2012_PV_reaplicacao_PPL_D2_CD6.pdf", "label1": "1º dia — Caderno 3 Branco", "label2": "2º dia — Caderno 6 Cinza"}, "2013": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2013/2013_PV_reaplicacao_PPL_D1_CD3.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2013/2013_PV_reaplicacao_PPL_D1_CD6.pdf", "label1": "1º dia — Caderno 3 Branco", "label2": "2º dia — Caderno 6 Cinza"}, "2014": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2014/2014_PPL_PV_D1_CD3.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2014/2014_PPL_PV_D2_CD6.pdf", "label1": "1º dia — Caderno 3 Branco", "label2": "2º dia — Caderno 6 Cinza"}, "2015": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2015/2015_PV_reaplicacao_PPL_D1_CD9.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2015/2015_PV_reaplicacao_PPL_D2_CD13.pdf", "label1": "1º dia — Caderno 9 Branco", "label2": "2º dia — Caderno 13 Cinza"}, "2016": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2016/2016_PV_reaplicacao_PPL_D1_CD9.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2016/2016_PV_reaplicacao_PPL_D2_CD13.pdf", "label1": "1º dia — Caderno 9 Branco", "label2": "2º dia — Caderno 13 Cinza"}, "2017": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2017/P2_01_azul.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2017/2017_PV_reaplicacao_PPL_D2_CD7.pdf", "label1": "1º dia — Caderno 1 Azul", "label2": "2º dia — Caderno 7 Azul"}, "2018": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2018/2018_PV_reaplicacao_PPL_D1_CD13.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2018/2018_PV_reaplicacao_PPL_D2_CD19.pdf", "label1": "1º dia — Caderno 13 Azul", "label2": "2º dia — Caderno 19 Azul"}, "2019": {"day1": "https://download.inep.gov.br/educacao_basica/enem/provas/2019/2019_PV_reaplicacao_PPL_D1_CD1.pdf", "day2": "https://download.inep.gov.br/educacao_basica/enem/provas/2019/2019_PV_reaplicacao_PPL_D2_CD7.pdf", "label1": "1º dia — Caderno 1 Azul", "label2": "2º dia — Caderno 7 Azul"}, "2020": {"day1": "https://download.inep.gov.br/enem/provas_e_gabaritos/2020_PV_reaplicacao_PPL_D1_CD1.pdf", "day2": "https://download.inep.gov.br/enem/provas_e_gabaritos/2020_PV_reaplicacao_PPL_D2_CD7.pdf", "label1": "1º dia — Caderno 1 Azul", "label2": "2º dia — Caderno 7 Azul"}};
+const STORAGE = "enem-ppl-hl-2011-2020-v1";
+const SUBMITTED = "enem-ppl-hl-2011-2020-v1-submitted";
+const $ = id => document.getElementById(id);
+
+let progress = {};
+let submitted = {};
+try { progress = JSON.parse(localStorage.getItem(STORAGE)||"{}"); } catch(e) {}
+try { submitted = JSON.parse(localStorage.getItem(SUBMITTED)||"{}"); } catch(e) {}
+
+const yearSel=$("year"), areaSel=$("area");
+YEARS.forEach(y=>yearSel.add(new Option(String(y),String(y))));
+AREA_OPTIONS.forEach(o=>areaSel.add(new Option(o.label,o.value)));
+yearSel.value="2020";
+areaSel.value=AREA_OPTIONS[0].value;
+
+function save(){
+  localStorage.setItem(STORAGE,JSON.stringify(progress));
+  localStorage.setItem(SUBMITTED,JSON.stringify(submitted));
+}
+function examId(){return `${yearSel.value}-${areaSel.value}`;}
+function qKey(num){return `${examId()}-${num}`;}
+function isDone(){return !!submitted[examId()];}
+function areaName(){
+  return AREA_OPTIONS.find(x=>x.value===areaSel.value)?.label || areaSel.value;
+}
+function questionNumbers(){
+  const y=Number(yearSel.value), a=areaSel.value;
+  if(y<=2016){
+    if(a==="humanas") return Array.from({length:45},(_,i)=>i+1);
+    if(a==="naturezas") return Array.from({length:45},(_,i)=>i+46);
+    if(a==="linguagens") return Array.from({length:45},(_,i)=>i+91);
+    return Array.from({length:45},(_,i)=>i+136);
+  } else {
+    if(a==="linguagens") return Array.from({length:45},(_,i)=>i+1);
+    if(a==="humanas") return Array.from({length:45},(_,i)=>i+46);
+    if(a==="naturezas") return Array.from({length:45},(_,i)=>i+91);
+    return Array.from({length:45},(_,i)=>i+136);
+  }
+}
+function answerKeyFor(num){
+  const nums=questionNumbers();
+  const idx=nums.indexOf(num);
+  return KEYS[yearSel.value][areaSel.value][idx];
+}
+function bookletDay(){
+  const y=Number(yearSel.value),a=areaSel.value;
+  if(y<=2016) return (a==="humanas"||a==="naturezas") ? "day1" : "day2";
+  return (a==="humanas"||a==="linguagens") ? "day1" : "day2";
+}
+let currentIndex=0;
+
+function setTab(which){
+  const book=which==="book";
+  $("bookPanel").classList.toggle("hidden",!book);
+  $("answerPanel").classList.toggle("hidden",book);
+  $("tabBook").classList.toggle("active",book);
+  $("tabAnswers").classList.toggle("active",!book);
+}
+$("tabBook").onclick=()=>setTab("book");
+$("tabAnswers").onclick=()=>setTab("answers");
+
+function updateBook(){
+  const y=yearSel.value, day=bookletDay(), b=BOOKLETS[y];
+  const url=b[day], label=day==="day1"?b.label1:b.label2;
+  $("bookLabel").textContent=`${y} PPL — ${label}`;
+  $("openPdf").href=url;
+  $("pdfFrame").src=url+"#view=FitH";
+  $("pdfHelp").style.display="block";
+}
+
+function answeredCount(){
+  return questionNumbers().filter(n=>progress[qKey(n)]).length;
+}
+function correctCount(){
+  if(!isDone()) return null;
+  return questionNumbers().reduce((sum,n)=>{
+    const key=answerKeyFor(n), ans=progress[qKey(n)];
+    return sum + ((key==="X" || ans===key) ? 1 : 0);
+  },0);
+}
+function updateSummary(){
+  const answered=answeredCount(), done=isDone(), y=yearSel.value;
+  let html=`<span class="chip"><strong>PPL ${y}</strong></span><span class="chip">${areaName()}</span><span class="chip">Respondidas: ${answered}/45</span>`;
+  if(done){
+    const c=correctCount();
+    html+=`<span class="chip">Acertos: <strong>${c}/45</strong></span><span class="chip">${Math.round(c/45*100)}%</span>`;
+  } else {
+    html+=`<span class="chip">Resultado oculto</span>`;
+  }
+  $("summary").innerHTML=html;
+}
+
+function paintAnswers(){
+  const nums=questionNumbers();
+  if(currentIndex<0) currentIndex=0;
+  if(currentIndex>=nums.length) currentIndex=nums.length-1;
+  const q=nums[currentIndex], done=isDone(), selected=progress[qKey(q)]||"";
+  $("qTitle").textContent=`Questão ${q}`;
+  $("qPos").textContent=`${currentIndex+1} de 45 · ${areaName()}`;
+
+  const box=$("answerButtons"); box.innerHTML="";
+  ["A","B","C","D","E"].forEach(letter=>{
+    const b=document.createElement("button");
+    b.className="answer-btn"+(selected===letter?" selected":"");
+    b.textContent=letter;
+    b.disabled=done;
+    b.onclick=()=>{
+      if(done) return;
+      progress[qKey(q)]=letter; save(); render(false);
+    };
+    box.appendChild(b);
+  });
+
+  const line=$("resultLine");
+  line.className="resultline"; line.textContent="";
+  if(done){
+    const key=answerKeyFor(q);
+    if(key==="X"){
+      line.className="resultline annulled";
+      line.textContent="Questão anulada — considerada correta no placar deste app.";
+    } else if(selected===key){
+      line.className="resultline ok";
+      line.textContent=`Correta. Sua resposta: ${selected} · Gabarito: ${key}`;
+    } else {
+      line.className="resultline bad";
+      line.textContent=`Incorreta. Sua resposta: ${selected || "—"} · Gabarito: ${key}`;
+    }
+  }
+
+  const grid=$("qGrid"); grid.innerHTML="";
+  nums.forEach((num,i)=>{
+    const b=document.createElement("button");
+    b.className="qcell";
+    b.textContent=String(num);
+    if(i===currentIndex) b.classList.add("current");
+    const ans=progress[qKey(num)];
+    if(!done && ans) b.classList.add("answered");
+    if(done){
+      const k=answerKeyFor(num);
+      if(k==="X") b.classList.add("annulled");
+      else if(ans===k) b.classList.add("correct");
+      else b.classList.add("wrong");
+    }
+    b.onclick=()=>{currentIndex=i;paintAnswers();};
+    grid.appendChild(b);
+  });
+
+  $("prev").disabled=currentIndex===0;
+  $("next").disabled=currentIndex===44;
+  const answered=answeredCount(), left=45-answered;
+  $("remaining").textContent=done ? "Prova finalizada. O gabarito está liberado." :
+    (left===0 ? "As 45 questões foram respondidas. Você já pode finalizar." :
+     `Faltam ${left} ${left===1?"questão":"questões"} para liberar o resultado.`);
+  $("finish").disabled=done || answered<45;
+  $("finish").classList.toggle("hidden",done);
+  $("restart").classList.toggle("hidden",!done);
+
+  const score=$("score");
+  if(done){
+    const c=correctCount(), annulled=nums.filter(n=>answerKeyFor(n)==="X").length;
+    score.classList.add("show");
+    score.innerHTML=`<strong>${c} de 45</strong> — ${Math.round(c/45*100)}%<br><span style="color:var(--muted);font-size:.9rem">Pontuação bruta do cartão-resposta${annulled?` · ${annulled} questão anulada contabilizada como correta`:''}. Não é uma estimativa de nota TRI.</span>`;
+  } else {
+    score.classList.remove("show"); score.innerHTML="";
+  }
+  $("langNote").textContent=areaSel.value==="linguagens"
+    ? "Nas questões de língua estrangeira, este cartão usa o gabarito de INGLÊS. No caderno aparecem também as questões de Espanhol."
+    : "";
+}
+
+function render(resetIndex=true){
+  if(resetIndex) currentIndex=0;
+  updateBook(); updateSummary(); paintAnswers();
+}
+$("prev").onclick=()=>{if(currentIndex>0){currentIndex--;paintAnswers();}};
+$("next").onclick=()=>{if(currentIndex<44){currentIndex++;paintAnswers();}};
+$("finish").onclick=()=>{
+  if(answeredCount()<45) return;
+  submitted[examId()]=true; save(); render(false);
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+$("restart").onclick=()=>{
+  if(!confirm(`Apagar todas as respostas de ${areaName()} — PPL ${yearSel.value} e refazer?`)) return;
+  questionNumbers().forEach(n=>delete progress[qKey(n)]);
+  delete submitted[examId()]; save(); render(true);
+};
+yearSel.onchange=()=>render(true);
+areaSel.onchange=()=>render(true);
+
+render(true);
+})();
+</script>
+</body>
+</html>
